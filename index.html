@@ -311,21 +311,24 @@
                   <div className="modal-image-wrapper">
                     <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
                   </div>
-                  <motion.button
+                  <motion.a
                     id="modal-reclamar-btn"
-                    onClick={() => {
-                      const phoneNumber = "5491161546312";
-                      const absoluteImgUrl = window.location.origin + '/' + imageSrc;
-                      const textMessage = `Hola, quiero este diseño: ${absoluteImgUrl}`;
-                      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textMessage)}`;
-                      window.open(whatsappUrl, '_blank');
-                      onClose();
-                    }}
+                    href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={onClose}
                     whileTap={{ scale: 0.96 }}
                     className="modal-cta-btn"
+                    style={{
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxSizing: 'border-box'
+                    }}
                   >
                     ✨ Reclamar
-                  </motion.button>
+                  </motion.a>
                 </motion.div>
               </motion.div>
             </>
