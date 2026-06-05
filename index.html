@@ -313,7 +313,14 @@
                   </div>
                   <motion.button
                     id="modal-reclamar-btn"
-                    onClick={onClose}
+                    onClick={() => {
+                      const phoneNumber = "5491161546312";
+                      const absoluteImgUrl = window.location.origin + '/' + imageSrc;
+                      const textMessage = `Hola, quiero este diseño: ${absoluteImgUrl}`;
+                      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textMessage)}`;
+                      window.open(whatsappUrl, '_blank');
+                      onClose();
+                    }}
                     whileTap={{ scale: 0.96 }}
                     className="modal-cta-btn"
                   >
