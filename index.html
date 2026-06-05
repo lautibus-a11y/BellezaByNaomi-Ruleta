@@ -271,11 +271,15 @@
 
     // ─── MODAL ────────────────────────────────────────────────────────────────
     const WinnerModal = ({ isOpen, imageSrc, onClose }) => {
+      const [isRedirecting, setIsRedirecting] = useState(false);
+
       useEffect(() => {
         if (isOpen) {
           const audio = new Audio('sonido-premio/sonidounavezganeelpremio.mp3');
           audio.volume = 0.65;
           audio.play().catch(e => console.warn("Audio autoplay blocked or failed:", e));
+        } else {
+          setIsRedirecting(false);
         }
       }, [isOpen]);
 
@@ -296,40 +300,85 @@
                 {/* Fuegos artificiales en el backdrop difuminado */}
                 <FireworksCanvas />
 
-                <motion.div
-                  id="winner-card"
-                  initial={{ scale: 0.85, y: 40, opacity: 0 }}
-                  animate={{ scale: 1, y: 0, opacity: 1 }}
-                  exit={{ scale: 0.92, opacity: 0 }}
-                  transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
-                  className="modal-card"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
-                  <h2 className="modal-title">¡Tu Diseño!</h2>
-                  <p className="modal-subtitle">Toma captura de pantalla y agendemos tu cita.</p>
-                  <div className="modal-image-wrapper">
-                    <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
-                  </div>
-                  <motion.a
-                    id="modal-reclamar-btn"
-                    href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={onClose}
-                    whileTap={{ scale: 0.96 }}
-                    className="modal-cta-btn"
-                    style={{
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    ✨ Reclamar
-                  </motion.a>
-                </motion.div>
+                <AnimatePresence mode="wait">
+                  {isRedirecting ? (
+                    <motion.div
+                      key="redirecting-card"
+                      id="winner-card"
+                      initial={{ scale: 0.85, y: 40, opacity: 0 }}
+                      animate={{ scale: 1, y: 0, opacity: 1 }}
+                      exit={{ scale: 0.92, opacity: 0 }}
+                      transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
+                      className="modal-card"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
+                      
+                      <div className="redirect-loader">
+                        <div className="redirect-loader__spinner" />
+                      </div>
+
+                      <h2 className="modal-title" style={{ marginTop: '24px' }}>Abriendo WhatsApp</h2>
+                      <p className="modal-subtitle" style={{ marginBottom: '24px', maxWidth: '300px' }}>
+                        Por favor, acepta el aviso de confirmación de tu pantalla para abrir el chat.
+                      </p>
+
+                      <button
+                        onClick={() => setIsRedirecting(false)}
+                        className="modal-cta-btn"
+                        style={{
+                          background: 'rgba(255,255,255,0.45)',
+                          border: '1px solid rgba(212,175,55,0.45)',
+                          color: 'var(--dark)',
+                          boxShadow: 'none',
+                          marginTop: '8px'
+                        }}
+                      >
+                        Volver
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="prize-card"
+                      id="winner-card"
+                      initial={{ scale: 0.85, y: 40, opacity: 0 }}
+                      animate={{ scale: 1, y: 0, opacity: 1 }}
+                      exit={{ scale: 0.92, opacity: 0 }}
+                      transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
+                      className="modal-card"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
+                      <h2 className="modal-title">¡Tu Diseño!</h2>
+                      <p className="modal-subtitle">Toma captura de pantalla y agendemos tu cita.</p>
+                      <div className="modal-image-wrapper">
+                        <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
+                      </div>
+                      <motion.a
+                        id="modal-reclamar-btn"
+                        href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          setIsRedirecting(true);
+                          // Auto cerrar tras 6s si ya están en WhatsApp
+                          setTimeout(onClose, 6000);
+                        }}
+                        whileTap={{ scale: 0.96 }}
+                        className="modal-cta-btn"
+                        style={{
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        ✨ Reclamar
+                      </motion.a>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             </>
           )}

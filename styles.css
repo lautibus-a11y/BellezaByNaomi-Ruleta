@@ -836,3 +836,28 @@ h1, h2, h3, .font-serif {
   );
   pointer-events: none;
 }
+
+/* Spinner de redirección de WhatsApp */
+.redirect-loader {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.redirect-loader__spinner {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(212, 175, 55, 0.15);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin-loader 1s linear infinite;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+@keyframes spin-loader {
+  to { transform: rotate(360deg); }
+}
