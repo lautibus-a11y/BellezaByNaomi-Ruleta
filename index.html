@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FECDC9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="favicon.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <!-- SEO -->
+  <title>BellezzaByNaomi — Ruleta de Diseños Luxury Nail Art</title>
+  <meta name="description" content="Gira la ruleta y descubre tu próximo diseño de uñas de lujo. Agenda tu cita con BellezzaByNaomi." />
+  <meta property="og:title" content="BellezzaByNaomi — Ruleta de Diseños" />
+  <meta property="og:description" content="Gira y descubre tu diseño de uñas perfecto." />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- React + ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Framer Motion -->
+  <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
+
+  <!-- Babel standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
+    const { motion, animate, useMotionValue, AnimatePresence } = window.Motion;
+
+    // ─── IMÁGENES LOCALES ──────────────────────────────────────────────────
+    const DESIGN_IMAGES = [
+      'imagenes-random/1.jpeg',
+      'imagenes-random/2.jpeg',
+      'imagenes-random/3.jpeg',
+      'imagenes-random/4.jpeg',
+      'imagenes-random/5.jpeg',
+      'imagenes-random/6.jpeg',
+      'imagenes-random/7.jpeg',
+      'imagenes-random/8.jpeg',
+      'imagenes-random/9.jpeg',
+      'imagenes-random/10.jpeg',
+      'imagenes-random/11.jpeg',
+    ];
+
+    // 11 imágenes × 40 repeticiones = 440 items en el carrusel
+    const SPINNER_ITEMS = Array(40).fill(DESIGN_IMAGES).flat();
+
+    // ─── Ancho de card ────────────────────────────────────────────────────────
+    function getCardWidth() {
+      const w = window.innerWidth;
+      if (w < 400)  return Math.round(w * 0.54);
+      if (w < 640)  return Math.round(w * 0.52);
+      if (w < 1024) return 260;
+      return 300;
+    }
+
+    const GAP = 14;
+
+    // ─── FONDO AURORA ────────────────────────────────────────────────────────────────
+    // 100% CSS keyframes — sin JS, manejado por el compositor GPU
+    const AmbientBackground = () => (
+      <div className="ambient-bg">
+        {/* 4 orbs de gradiente radial que flotan suavemente */}
+        <div className="aurora-orb aurora-orb--1" />
+        <div className="aurora-orb aurora-orb--2" />
+        <div className="aurora-orb aurora-orb--3" />
+        <div className="aurora-orb aurora-orb--4" />
+        <div className="noise-overlay" />
+      </div>
+    );
+
+    // ─── CONFETTI ─────────────────────────────────────────────────────────────
+    const CONFETTI_COLORS = ['#ffffff', '#D4AF37', '#FF69B4', '#ffced6', '#FFC0CB'];
+    const ConfettiBurst = () => (
+      <div className="confetti-container">
+        {Array.from({ length: 50 }).map((_, i) => {
+          const angle    = Math.random() * Math.PI * 2;
+          const velocity = 25 + Math.random() * 60;
+          const x = Math.cos(angle) * velocity;
+          const y = Math.sin(angle) * velocity;
+          return (
+            <motion.div
+              key={i}
+              initial={{ x: 0, y: 0, scale: 0, opacity: 1, rotate: 0 }}
+              animate={{
+                x: `${x}vw`,
+                y: [`0vh`, `${y - 8}vh`, `${y + 100}vh`],
+                scale: [0, 1, 1, 0.3],
+                opacity: [1, 1, 0.6, 0],
+                rotate: Math.random() * 720,
+              }}
+              transition={{ duration: 2 + Math.random() * 2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="confetti-piece"
+              style={{ backgroundColor: CONFETTI_COLORS[i % CONFETTI_COLORS.length] }}
+            />
+          );
+        })}
+      </div>
+    );
+
+    // ─── HEADER ───────────────────────────────────────────────────────────────
+    const HeroTitle = () => (
+      <div className="header-bar">
+        <div className="header-deco" aria-hidden="true" />
+        <div className="header-center">
+          <span className="header-eyebrow">Luxury Nail Art</span>
+          <h1 className="header-title">
+            <span className="title-dark">Bellezza</span>
+            <span className="title-gold">ByNaomi</span>
+          </h1>
+        </div>
+        <div className="header-deco header-deco--right" aria-hidden="true" />
+      </div>
+    );
+
+    // ─── ICONOS ───────────────────────────────────────────────────────────────
+    const SparklesIcon = ({ size = 18 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+      </svg>
+    );
+    const StarIcon = ({ size = 18 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    );
+
+    // ─── FUEGOS ARTIFICIALES (canvas — sin React en cada frame) ──────────────
+    const FW_COLORS = ['#FECDC9', '#D4AF37', '#FFF3B0', '#FF69B4', '#ffffff', '#ffb3c6', '#B38728'];
+
+    class FWParticle {
+      constructor(x, y, isRocket) {
+        this.x = x;
+        this.y = y;
+        this.isRocket = isRocket;
+        this.color = FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)];
+        if (isRocket) {
+          this.vx = (Math.random() - 0.5) * 1.8;
+          this.vy = -(Math.random() * 9 + 8);
+          this.size = 2.5;
+          this.decay = 0.006;
+          this.exploded = false;
+          this.trail = [];
+        } else {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 5.5 + 0.5;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed - 1.5;
+          this.size = Math.random() * 2.8 + 0.6;
+          this.decay = Math.random() * 0.018 + 0.008;
+        }
+        this.alpha = 1;
+        this.gravity = 0.12;
+      }
+      update() {
+        if (this.isRocket) {
+          this.trail.push({ x: this.x, y: this.y, alpha: 0.6 });
+          if (this.trail.length > 8) this.trail.shift();
+        }
+        this.vx *= 0.985;
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+      }
+      draw(ctx) {
+        // Trail del cohete
+        if (this.isRocket && this.trail.length) {
+          this.trail.forEach((t, i) => {
+            ctx.globalAlpha = (t.alpha * i) / this.trail.length * 0.5;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, this.size * 0.7, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.shadowBlur = this.isRocket ? 8 : 6;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    const FireworksCanvas = () => {
+      const canvasRef = useRef(null);
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+
+        const explode = (x, y, baseColor) => {
+          const n = Math.floor(Math.random() * 25) + 45;
+          for (let i = 0; i < n; i++) {
+            const p = new FWParticle(x, y, false);
+            if (Math.random() < 0.3) p.color = baseColor; // cohesión de color
+            particles.push(p);
+          }
+          // Chispas blancas/doradas en el centro
+          for (let i = 0; i < 12; i++) {
+            const s = new FWParticle(x, y, false);
+            s.color = Math.random() < 0.5 ? '#ffffff' : '#FFF3B0';
+            s.size  = Math.random() * 1.5 + 0.5;
+            s.decay = 0.025;
+            particles.push(s);
+          }
+        };
+
+        const launch = () => {
+          const x = window.innerWidth * (0.1 + Math.random() * 0.8);
+          const r = new FWParticle(x, canvas.height, true);
+          particles.push(r);
+        };
+
+        // Primeros lanzamientos inmediatos para impacto
+        launch(); launch();
+        const interval = setInterval(() => {
+          const burst = Math.floor(Math.random() * 2) + 1;
+          for (let i = 0; i < burst; i++) setTimeout(launch, i * 220);
+        }, 800);
+
+        let rafId;
+        const loop = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.update();
+            // Explotar cohete cuando empieza a caer
+            if (p.isRocket && !p.exploded && p.vy >= -0.5) {
+              p.exploded = true;
+              explode(p.x, p.y, p.color);
+              particles.splice(i, 1);
+              continue;
+            }
+            if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+            p.draw(ctx);
+          }
+          rafId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => { cancelAnimationFrame(rafId); clearInterval(interval); };
+      }, []);
+
+      return <canvas ref={canvasRef} className="fireworks-canvas" />;
+    };
+
+    // ─── MODAL ────────────────────────────────────────────────────────────────
+    const WinnerModal = ({ isOpen, imageSrc, onClose }) => {
+      useEffect(() => {
+        if (isOpen) {
+          const audio = new Audio('sonido-premio/sonidounavezganeelpremio.mp3');
+          audio.volume = 0.65;
+          audio.play().catch(e => console.warn("Audio autoplay blocked or failed:", e));
+        }
+      }, [isOpen]);
+
+      return (
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <ConfettiBurst />
+              <motion.div
+                id="winner-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="modal-overlay"
+                onClick={onClose}
+              >
+                {/* Fuegos artificiales en el backdrop difuminado */}
+                <FireworksCanvas />
+
+                <motion.div
+                  id="winner-card"
+                  initial={{ scale: 0.85, y: 40, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.92, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
+                  className="modal-card"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
+                  <h2 className="modal-title">¡Tu Diseño!</h2>
+                  <p className="modal-subtitle">Toma captura de pantalla y agendemos tu cita.</p>
+                  <div className="modal-image-wrapper">
+                    <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
+                  </div>
+                  <motion.button
+                    id="modal-reclamar-btn"
+                    onClick={onClose}
+                    whileTap={{ scale: 0.96 }}
+                    className="modal-cta-btn"
+                  >
+                    ✨ Reclamar
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      );
+    };
+
+    // ─── PARTÍCULAS DE CORAZONES DORADOS PARA EL REVEAL ─────────────────────────
+    const HeartsCanvas = () => {
+      const canvasRef = useRef(null);
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        const handleResize = () => {
+          if (!canvas) return;
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        const particles = [];
+        const colors = [
+          '#D4AF37', // Oro clásico
+          '#FFD700', // Oro brillante
+          '#F3E5AB', // Oro suave (vainilla)
+          '#FFE875', // Oro claro
+          '#E6C229'  // Oro oscuro/mostaza
+        ];
+
+        class HeartParticle {
+          constructor() {
+            this.reset(true);
+          }
+          reset(init = false) {
+            this.x = Math.random() * width;
+            this.y = init ? Math.random() * height : height + 20;
+            this.size = Math.random() * 5 + 4; // de 4px a 9px (más pequeños)
+            this.speedY = Math.random() * 0.7 + 0.4; // velocidad de ascenso más lenta
+            this.opacity = Math.random() * 0.15 + 0.1; // opacidad muy sutil (0.1 a 0.25)
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.angle = Math.random() * Math.PI * 2;
+            this.swaySpeed = Math.random() * 0.02 + 0.01;
+            this.swayAmount = Math.random() * 0.9 + 0.3;
+          }
+          update() {
+            this.y -= this.speedY;
+            this.angle += this.swaySpeed;
+            this.x += Math.sin(this.angle) * this.swayAmount;
+            
+            if (this.y < -20) {
+              this.reset(false);
+            }
+          }
+          draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.opacity;
+
+            ctx.beginPath();
+            const s = this.size;
+            ctx.moveTo(0, -s / 4);
+            ctx.bezierCurveTo(-s / 2, -s * 3 / 4, -s, -s / 4, -s, s / 4);
+            ctx.bezierCurveTo(-s, s * 3 / 4, 0, s * 1.1, 0, s * 1.3);
+            ctx.bezierCurveTo(0, s * 1.1, s, s * 3 / 4, s, s / 4);
+            ctx.bezierCurveTo(s, -s / 4, s / 2, -s * 3 / 4, 0, -s / 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+
+        // 14 corazones dorados (muy sutiles y elegantes)
+        for (let i = 0; i < 14; i++) {
+          particles.push(new HeartParticle());
+        }
+
+        let rafId;
+        const loop = () => {
+          ctx.clearRect(0, 0, width, height);
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.update();
+            p.draw();
+          }
+          rafId = requestAnimationFrame(loop);
+        };
+        loop();
+
+        return () => {
+          cancelAnimationFrame(rafId);
+          window.removeEventListener('resize', handleResize);
+        };
+      }, []);
+
+      return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }} />;
+    };
+
+    // ─── CINEMATIC REVEAL ──────────────────────────────────────────────────
+    const CinematicReveal = ({ onComplete }) => {
+      const doneRef = useRef(false);
+      const onCompleteRef = useRef(onComplete);
+      onCompleteRef.current = onComplete;
+
+      const triggerExit = useCallback(() => {
+        if (doneRef.current) return;
+        doneRef.current = true;
+        onCompleteRef.current(); // showReveal=false → AnimatePresence exit slide-up
+      }, []);
+
+      useEffect(() => {
+        const t = setTimeout(triggerExit, 3500);
+        return () => clearTimeout(t);
+      }, []); // eslint-disable-line
+
+      return (
+        <motion.div
+          className="cr-root"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.9, ease: 'easeInOut' }}
+          onClick={triggerExit}
+        >
+          <div className="cr-bg" />
+          <HeartsCanvas />
+          <div className="cr-overlay" />
+        </motion.div>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════════
+    // APP PRINCIPAL
+    // Optimización clave: useMotionValue para el track → 0 React re-renders
+    // durante el giro. Las cards usan clases CSS + transition, no Framer Motion.
+    // ═══════════════════════════════════════════════════════════════════
+    function App() {
+      const [isSpinning,   setIsSpinning]   = useState(false);
+      const [hasRevealed,  setHasRevealed]  = useState(false);
+      const [showModal,    setShowModal]    = useState(false);
+      const [currentIndex, setCurrentIndex] = useState(10);
+      const [itemWidth,    setItemWidth]    = useState(getCardWidth);
+      // Intro cinemática — true = mostrar reveal, false = app lista
+      const [showReveal,   setShowReveal]   = useState(true);
+
+      // ── useMotionValue: la posición X del track es DOM puro, sin React ──
+      const trackX = useMotionValue(-(10 * (getCardWidth() + GAP)) + ((window.innerWidth / 2) - (getCardWidth() / 2)));
+
+      const totalItemWidth = itemWidth + GAP;
+
+      // Helper: offset para centrar el item seleccionado
+      const centerOffset = useCallback(
+        () => (window.innerWidth / 2) - (itemWidth / 2),
+        [itemWidth]
+      );
+
+      // Resize
+      useEffect(() => {
+        const onResize = () => setItemWidth(getCardWidth());
+        window.addEventListener('resize', onResize, { passive: true });
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+
+      // Reposicionar sin animación cuando cambia el ancho
+      useEffect(() => {
+        trackX.set(-(currentIndex * totalItemWidth) + centerOffset());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [itemWidth]);
+
+      // ── Lógica de giro ────────────────────────────────────────────────
+      const handleSpin = useCallback(async () => {
+        if (isSpinning) return;
+
+        setIsSpinning(true);
+        setHasRevealed(false);
+        setShowModal(false);
+
+        const jumpAmount  = Math.floor(Math.random() * 22) + 28; // 28-50 items
+        const targetIndex = currentIndex + jumpAmount;
+        const offset      = centerOffset();
+        const currentX    = trackX.get();
+        const targetX     = -(targetIndex * totalItemWidth) + offset;
+
+        // 1) Pull-back de anticipación (corto, snappy)
+        await animate(trackX, currentX + 32, {
+          duration: 0.35,
+          ease: [0.33, 0, 0.66, 0],   // ease-in: arranca rápido hacia atrás
+        });
+
+        // 2) Giro principal — curva casino: explosión inicial → desaceleración ultra-suave
+        await animate(trackX, targetX, {
+          duration: 4.8,
+          ease: [0.06, 0.95, 0.1, 1], // arranque explosivo, frenado largo y sutil
+        });
+
+        // Fin del giro
+        setCurrentIndex(targetIndex);
+        setIsSpinning(false);
+        setHasRevealed(true);
+
+        if (window.navigator?.vibrate) window.navigator.vibrate([35, 35, 70]);
+        setTimeout(() => setShowModal(true), 500);
+
+      }, [isSpinning, currentIndex, totalItemWidth, centerOffset, trackX]);
+
+      // ── Render ────────────────────────────────────────────────────────
+      return (
+        <div className="app-root">
+          <AmbientBackground />
+
+          <WinnerModal
+            isOpen={showModal}
+            imageSrc={SPINNER_ITEMS[currentIndex]}
+            onClose={() => setShowModal(false)}
+          />
+
+          <div className="app-layout">
+
+            <header className="app-header">
+              <HeroTitle />
+            </header>
+
+            <main className="spinner-area">
+              {/* Sombras laterales del carrousel */}
+              <div className="carousel-shadow carousel-shadow--left"  aria-hidden="true" />
+              <div className="carousel-shadow carousel-shadow--right" aria-hidden="true" />
+
+              <div className="spinner-viewport">
+                {/* Palito selector */}
+                <div className="selector-line" aria-hidden="true">
+                  <div className="selector-line__inner" />
+                  <div className="selector-diamond selector-diamond--top" />
+                  <div className="selector-diamond selector-diamond--bottom" />
+                </div>
+
+                {/*
+                  *** OPTIMIZACIÓN CLAVE ***
+                  motion.div con style={{ x: trackX }} → actualiza el DOM
+                  directamente sin pasar por React. 0 re-renders durante el giro.
+
+                  Las cards NO usan Framer Motion animate individual.
+                  Solo clases CSS + transition para opacity/scale/filter.
+                  Esto elimina 400 animaciones de Framer Motion simultáneas.
+                */}
+                <motion.div
+                  className={`spinner-track${isSpinning ? ' is-spinning' : ''}`}
+                  style={{ x: trackX, gap: `${GAP}px` }}
+                >
+                  {SPINNER_ITEMS.map((imgSrc, index) => {
+                    const isWinner  = hasRevealed && index === currentIndex;
+                    const isDimmed  = hasRevealed && !isWinner;
+
+                    return (
+                      <div
+                        key={`${index}-${imgSrc}`}
+                        className={[
+                          'spinner-card',
+                          isWinner ? 'is-winner'  : '',
+                          isDimmed ? 'is-dimmed'  : '',
+                        ].join(' ').trim()}
+                        style={{
+                          width:  `${itemWidth}px`,
+                          height: `${Math.round(itemWidth * 1.42)}px`,
+                        }}
+                      >
+                        <img
+                          src={imgSrc}
+                          alt="Nail Design"
+                          className="spinner-card__img"
+                          loading={index < 20 ? 'eager' : 'lazy'}
+                          decoding="async"
+                        />
+                        <div className="spinner-card__glass-overlay" />
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+            </main>
+
+            <footer className="app-footer">
+              <motion.button
+                id="spin-button"
+                onClick={handleSpin}
+                disabled={isSpinning}
+                whileTap={!isSpinning ? { scale: 0.94 } : {}}
+                className={`spin-btn${isSpinning ? ' spin-btn--busy' : ''}`}
+                aria-label={isSpinning ? 'Buscando diseño...' : (hasRevealed ? 'Girar de nuevo' : 'Girar diseño')}
+              >
+                <span className="spin-btn__content">
+                  {isSpinning ? (
+                    <>
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+                        className="spin-btn__icon spin-btn__icon--muted"
+                      >
+                        <StarIcon size={18} />
+                      </motion.span>
+                      BUSCANDO...
+                    </>
+                  ) : (
+                    <>
+                      <span className="spin-btn__icon spin-btn__icon--gold"><SparklesIcon size={18} /></span>
+                      {hasRevealed ? 'GIRAR DE NUEVO' : 'GIRAR DISEÑO'}
+                      <span className="spin-btn__icon spin-btn__icon--gold"><SparklesIcon size={18} /></span>
+                    </>
+                  )}
+                </span>
+                <span className="spin-btn__shine" aria-hidden="true" />
+              </motion.button>
+            </footer>
+
+          </div>
+
+          {/* Cinematic reveal — z-index 200, encima de todo */}
+          <AnimatePresence>
+            {showReveal && (
+              <CinematicReveal onComplete={() => setShowReveal(false)} />
+            )}
+          </AnimatePresence>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

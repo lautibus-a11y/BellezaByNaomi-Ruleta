@@ -1,0 +1,819 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BellezzaByNaomi — Mobile-First Styles v2
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Reset & Variables ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --pink:         #FECDC9;
+  --dark:         #4A3331;
+  --muted:        #8E635F;
+  --gold:         #D4AF37;
+  --gold-light:   #FFF3B0;
+  --gold-dark:    #B38728;
+  --gold-border:  rgba(212, 175, 55, 0.85);
+  --white-glass:  rgba(255, 255, 255, 0.35);
+
+  /* Safe areas (iOS notch/home bar) */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+
+  /* Card dimensions — mobile first */
+  --card-w: 52vw;      /* ~200px on 390px screen */
+  --card-ratio: 1.45;
+}
+
+/* ─── Tipografía global ─────────────────────────────────────────── */
+html {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  background-color: var(--pink);
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  overflow: hidden;
+  touch-action: none;
+  /* Mejora rendimiento scroll en iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+::-webkit-scrollbar { display: none; }
+
+/* ─── App Root ──────────────────────────────────────────────────── */
+.app-root {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  background-color: var(--pink);
+  color: var(--dark);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Aurora Gradient Background ────────────────────────────────── */
+/*
+  Implementación: 4 orbs de gradiente radial que flotan con keyframes CSS.
+  Solo anima `transform` (translate + scale) — 100% GPU compositor,
+  sin layout ni paint en cada frame. Muy ligero.
+*/
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* Base: el rosa principal de la web */
+  background-color: #FECDC9;
+  overflow: hidden;
+}
+
+/* Orb base — shared styles */
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  /* Solo transform es animado — el blur es estático (no repinta) */
+  will-change: transform;
+}
+
+/* Orb 1 — Grande, esquina superior-izquierda. Rosa claro / crema */
+.aurora-orb--1 {
+  width: 90vmax;
+  height: 90vmax;
+  top: -35%;
+  left: -30%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 225, 222, 0.85) 0%,
+    rgba(255, 200, 195, 0.55) 40%,
+    transparent 72%
+  );
+  filter: blur(48px);
+  animation: aurora-1 20s ease-in-out infinite;
+}
+
+/* Orb 2 — Mediano-grande, esquina inferior-derecha. Rosa más oscuro */
+.aurora-orb--2 {
+  width: 75vmax;
+  height: 75vmax;
+  bottom: -25%;
+  right: -25%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 155, 170, 0.55) 0%,
+    rgba(255, 175, 185, 0.35) 45%,
+    transparent 72%
+  );
+  filter: blur(56px);
+  animation: aurora-2 26s ease-in-out infinite;
+}
+
+/* Orb 3 — Mediano, zona central-derecha. Rosa medio/melocotón */
+.aurora-orb--3 {
+  width: 60vmax;
+  height: 60vmax;
+  top: 15%;
+  right: -15%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 195, 190, 0.65) 0%,
+    rgba(255, 210, 205, 0.38) 50%,
+    transparent 72%
+  );
+  filter: blur(44px);
+  animation: aurora-3 17s ease-in-out infinite;
+}
+
+/* Orb 4 — Pequeño, zona inferior-izquierda. Acento rosa oscuro */
+.aurora-orb--4 {
+  width: 45vmax;
+  height: 45vmax;
+  bottom: 5%;
+  left: -10%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 135, 160, 0.38) 0%,
+    rgba(255, 160, 175, 0.22) 50%,
+    transparent 72%
+  );
+  filter: blur(40px);
+  animation: aurora-4 23s ease-in-out infinite;
+}
+
+/* ─── Keyframes de movimiento ───────────────────────────────────────── */
+/* Solo transform: translate + scale — jamas repinta, usa compositor GPU */
+@keyframes aurora-1 {
+  0%,  100% { transform: translate(0%,   0%)   scale(1);    }
+  25%        { transform: translate(8%,   12%)  scale(1.08); }
+  55%        { transform: translate(15%,  5%)   scale(0.96); }
+  80%        { transform: translate(4%,   16%)  scale(1.05); }
+}
+@keyframes aurora-2 {
+  0%,  100% { transform: translate(0%,   0%)   scale(1);    }
+  30%        { transform: translate(-12%, -8%)  scale(1.12); }
+  60%        { transform: translate(-5%,  -14%) scale(0.93); }
+  80%        { transform: translate(-10%, -5%)  scale(1.04); }
+}
+@keyframes aurora-3 {
+  0%,  100% { transform: translate(0%,   0%)   scale(1);    }
+  35%        { transform: translate(-18%, 10%)  scale(1.15); }
+  70%        { transform: translate(-8%,  16%)  scale(0.90); }
+}
+@keyframes aurora-4 {
+  0%,  100% { transform: translate(0%,   0%)   scale(1);    }
+  40%        { transform: translate(16%,  -12%) scale(1.18); }
+  75%        { transform: translate(8%,   -6%)  scale(0.95); }
+}
+
+/* Textura de grano sutil encima de los orbs */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────── */
+.app-layout {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  /* Header fijo arriba, spinner flex-1, footer fijo abajo */
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HEADER — Barra redondeada de punta a punta
+   ═══════════════════════════════════════════════════════════════════ */
+.app-header {
+  flex: none;
+  width: 100%;
+  padding: calc(var(--sat) + 10px) 0 0;
+  z-index: 20;
+}
+
+.header-bar {
+  /* Ocupa de punta a punta con margen mínimo */
+  margin: 0 12px;
+  border-radius: 20px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.30) 60%,
+    rgba(212,175,55,0.15) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.08),
+    0 1px 0 rgba(255,255,255,0.8) inset;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: row;         /* HORIZONTAL siempre */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Líneas decorativas a los lados */
+.header-deco {
+  flex: 1;
+  height: 1px;
+  max-width: 60px;
+  background: linear-gradient(to right, transparent, var(--gold));
+}
+.header-deco--right {
+  background: linear-gradient(to left, transparent, var(--gold));
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.header-eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.header-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  /* Siempre en una sola línea horizontal */
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.1em;
+}
+
+.title-dark {
+  color: var(--dark);
+  filter: drop-shadow(0 1px 3px rgba(255,255,255,0.7));
+}
+
+.title-gold {
+  background: linear-gradient(160deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tablet+ */
+@media (min-width: 640px) {
+  .header-bar    { margin: 0 20px; padding: 12px 28px; border-radius: 24px; }
+  .header-title  { font-size: 2rem; }
+  .header-eyebrow { font-size: 9px; }
+}
+@media (min-width: 1024px) {
+  .header-title  { font-size: 2.5rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SPINNER AREA — Carrousel grande en mobile
+   ═══════════════════════════════════════════════════════════════════ */
+.spinner-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ─── Sombras laterales del carrousel ───────────────────────────── */
+/* Gradiente que da profundidad y foco al card central */
+.carousel-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(60px, 18vw, 140px);
+  z-index: 25;
+  pointer-events: none;
+}
+.carousel-shadow--left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--pink) 0%,
+    rgba(254,205,201,0.85) 35%,
+    rgba(254,205,201,0.45) 65%,
+    transparent 100%
+  );
+}
+.carousel-shadow--right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--pink) 0%,
+    rgba(254,205,201,0.85) 35%,
+    rgba(254,205,201,0.45) 65%,
+    transparent 100%
+  );
+}
+
+/* Fondo glassmorphism del área de spin */
+.glass-frame {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  /* En mobile la altura del frame coincide con la de la card */
+  height: calc(var(--card-w) * var(--card-ratio) + 32px);
+  background: linear-gradient(
+    to bottom,
+    rgba(254,205,201,0.05),
+    rgba(255,255,255,0.35),
+    rgba(254,205,201,0.05)
+  );
+  pointer-events: none;
+}
+
+.spinner-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  /* GPU compositing */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* ─── Palito selector (más corto) ───────────────────────────────── */
+.selector-line {
+  position: absolute;
+  left: 50%;
+  /* Solo ocupa el 60% central de la pantalla, no toda la altura */
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  transform: translateX(-50%);
+  z-index: 30;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selector-line__inner {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to bottom, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+  box-shadow: 0 0 10px var(--gold), 0 0 20px rgba(212,175,55,0.4);
+}
+
+.selector-diamond {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background-color: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 16px rgba(212,175,55,0.5);
+}
+/* Los diamantes quedan dentro del palito corto */
+.selector-diamond--top    { top: -5px; }
+.selector-diamond--bottom { bottom: -5px; }
+
+/* ─── Pista ─────────────────────────────────────────────────────── */
+.spinner-track {
+  display: flex;
+  align-items: center;
+  /* GPU layer dedicada — el cambio más importante para fluidez */
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Durante el giro: blur via CSS class, no Framer Motion individual */
+.spinner-track.is-spinning .spinner-card {
+  filter: blur(1.8px) brightness(0.95);
+  /* Sin transition durante el giro para no acumular work */
+  transition: none;
+}
+
+/* ─── Tarjeta del carrousel ─────────────────────────────────────── */
+.spinner-card {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  /* BORDE DORADO */
+  border: 2px solid var(--gold-border);
+  box-shadow:
+    0 0 0 1px rgba(212,175,55,0.18),
+    0 10px 28px rgba(74,51,49,0.18),
+    0 2px 6px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.55);
+  /*
+    CSS transition pura — reemplaza Framer Motion por card.
+    Elimina ~400 instancias de animate() simultáneas.
+  */
+  transition:
+    opacity    0.32s ease,
+    transform  0.32s ease,
+    filter     0.32s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease;
+  /* GPU hint por card */
+  transform: translateZ(0);
+  contain: layout style;
+}
+
+/* Estado dimmed (los no-ganadores después del reveal) */
+.spinner-card.is-dimmed {
+  opacity: 0.45;
+  transform: scale(0.93) translateZ(0);
+}
+
+/* Tarjeta ganadora */
+.spinner-card.is-winner {
+  opacity: 1;
+  transform: scale(1.06) translateZ(0);
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 0 24px rgba(212,175,55,0.55),
+    0 16px 36px rgba(74,51,49,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  /* Animación winner-pulse vía keyframe CSS */
+  animation: winner-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes winner-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--gold), 0 0 18px rgba(212,175,55,0.5),  0 16px 36px rgba(74,51,49,0.22); }
+  50%       { box-shadow: 0 0 0 3px var(--gold), 0 0 36px rgba(212,175,55,0.85), 0 16px 36px rgba(74,51,49,0.22); }
+}
+
+.spinner-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.spinner-card__glass-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,0.14) 0%,
+    transparent 55%,
+    rgba(212,175,55,0.04) 100%
+  );
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FOOTER — Botón de spin
+   ═══════════════════════════════════════════════════════════════════ */
+.app-footer {
+  flex: none;
+  padding: 12px 16px calc(var(--sab) + 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .app-footer { padding-bottom: calc(var(--sab) + 36px); }
+}
+
+.spin-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  /* Altura táctil mínima recomendada: 48px */
+  padding: 15px 28px;
+  min-height: 52px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1.5px solid rgba(212, 175, 55, 0.8);
+  cursor: pointer;
+  width: 100%;
+  max-width: 420px;
+  color: var(--dark);
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 100%);
+  box-shadow:
+    inset 0 0 20px rgba(255,255,255,0.6),
+    0 6px 24px rgba(212,175,55,0.2);
+  transition: box-shadow 0.25s, transform 0.1s;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  /* Evita el flash en iOS al tocar */
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.spin-btn:active:not(.spin-btn--busy) {
+  transform: scale(0.96);
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.6), 0 3px 12px rgba(212,175,55,0.25);
+}
+
+.spin-btn--busy {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .spin-btn { padding: 18px 40px; font-size: 15px; }
+}
+@media (min-width: 768px) {
+  .spin-btn { font-size: 18px; }
+}
+
+.spin-btn__content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+}
+
+.spin-btn__icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.spin-btn__icon--gold  { color: var(--gold); }
+.spin-btn__icon--muted { color: var(--muted); }
+
+/* Shine effect */
+.spin-btn__shine {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  height: 100%;
+  width: 60%;
+  transform: skewX(-15deg);
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.7));
+  opacity: 0;
+  pointer-events: none;
+}
+.spin-btn:hover:not(.spin-btn--busy) .spin-btn__shine {
+  opacity: 1;
+  animation: shine 1.8s infinite;
+}
+@keyframes shine {
+  0%   { left: -120%; }
+  100% { left: 200%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODAL & CONFETTI
+   ═══════════════════════════════════════════════════════════════════ */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 7px;
+  height: 14px;
+  border-radius: 2px;
+}
+@media (min-width: 640px) {
+  .confetti-piece { width: 10px; height: 20px; }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.42);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* Canvas de fuegos artificiales — dentro del overlay, detras de la card */
+.fireworks-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  /* z-index: 1 relativo al stacking context del overlay (backdrop-filter crea uno) */
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.modal-card {
+  position: relative;
+  /* Encima del canvas de fuegos artificiales */
+  z-index: 2;
+  width: 100%;
+  max-width: 360px;
+  /* ── GLASSMORPHISM ROSADO GRADIENTE CON BLANCO ── */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(254, 205, 201, 0.52) 100%
+  );
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  padding: 20px 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.55) inset,
+    0 4px 16px rgba(212, 175, 55, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .modal-card { max-width: 420px; padding: 24px; }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 50%;
+  color: var(--dark);
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-close-btn:hover { background: white; }
+
+.modal-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 6px;
+  text-align: center;
+}
+@media (min-width: 640px) {
+  .modal-title { font-size: 1.75rem; }
+}
+
+.modal-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 18px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.modal-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  /* Borde dorado en el modal también */
+  border: 2px solid var(--gold-border);
+  box-shadow: 0 8px 32px rgba(212,175,55,0.2);
+}
+
+.modal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-cta-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 16px;
+  /* Gradiente rosa → dorado */
+  background: linear-gradient(
+    to right,
+    #FECDC9 0%,
+    #f5c86a 45%,
+    #D4AF37 100%
+  );
+  color: #4A3331;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  letter-spacing: 0.2em;
+  font-size: 14px;
+  text-transform: uppercase;
+  box-shadow:
+    0 4px 20px rgba(212,175,55,0.35),
+    0 1px 0 rgba(255,255,255,0.6) inset;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: transform 0.1s, box-shadow 0.2s;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+}
+.modal-cta-btn:hover {
+  box-shadow:
+    0 6px 28px rgba(212,175,55,0.5),
+    0 1px 0 rgba(255,255,255,0.6) inset;
+}
+.modal-cta-btn:active { transform: scale(0.97); }
+
+/* ═════════════════════════════════════════════════════════════════
+   CINEMATIC REVEAL — simple fade + Ken Burns
+   ═════════════════════════════════════════════════════════════════ */
+.cr-root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #FAC8C4; /* Soft pink matching new background */
+}
+
+/* Fondo — Ken Burns solo CSS, GPU compositor */
+.cr-bg {
+  position: absolute;
+  inset: -8%;
+  background-image: url('cinematic-intro/fondo%20cinematic%20reveal.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #FAC8C4;
+  will-change: transform;
+  /* 3.8s total: zoom empieza rápido (ease-out) y dura menos */
+  animation: cr-kenburns 3.8s ease-out forwards;
+}
+
+@media (max-width: 768px) {
+  .cr-bg {
+    background-size: cover; /* cover on mobile to fill the vertical screen */
+  }
+}
+
+@keyframes cr-kenburns {
+  from { transform: scale(1.16); }
+  to   { transform: scale(1.0);  }
+}
+
+/* Viñeta perimetral sutil */
+.cr-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  pointer-events: none;
+}
