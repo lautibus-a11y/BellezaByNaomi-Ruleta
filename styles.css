@@ -506,7 +506,7 @@ h1, h2, h3, .font-serif {
    ═══════════════════════════════════════════════════════════════════ */
 .app-footer {
   flex: none;
-  padding: 12px 16px calc(var(--sab) + 20px);
+  padding: 12px 16px calc(var(--sab) + 36px); /* Elevado en móviles */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -515,7 +515,7 @@ h1, h2, h3, .font-serif {
 }
 
 @media (min-width: 640px) {
-  .app-footer { padding-bottom: calc(var(--sab) + 36px); }
+  .app-footer { padding-bottom: calc(var(--sab) + 54px); } /* Elevado en escritorio */
 }
 
 .spin-btn {
@@ -529,29 +529,48 @@ h1, h2, h3, .font-serif {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  border: 1.5px solid rgba(212, 175, 55, 0.8);
+  border: 2.5px solid var(--gold); /* Borde dorado más grueso y notorio */
   cursor: pointer;
   width: 100%;
   max-width: 420px;
   color: var(--dark);
-  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 100%);
+  /* Súper-puesto con gradiente satinado brillante de blanco a rosa-oro */
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(254,205,201,0.5) 50%, rgba(212,175,55,0.15) 100%);
   box-shadow:
-    inset 0 0 20px rgba(255,255,255,0.6),
-    0 6px 24px rgba(212,175,55,0.2);
+    inset 0 0 24px rgba(255,255,255,0.8),
+    0 10px 32px rgba(212,175,55,0.32); /* Sombras 3D más profundas y notorias */
   transition: box-shadow 0.25s, transform 0.1s;
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   /* Evita el flash en iOS al tocar */
   -webkit-touch-callout: none;
   user-select: none;
 }
 
+/* Animación sutil de sacudida (shake) para llamar la atención cada cierto tiempo */
+.spin-btn:not(.spin-btn--busy) {
+  animation: spin-btn-shake 4.5s ease-in-out infinite;
+}
+
+@keyframes spin-btn-shake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  2% { transform: rotate(1.5deg) scale(1.02); }
+  4% { transform: rotate(-1.5deg) scale(1.02); }
+  6% { transform: rotate(1.5deg) scale(1.02); }
+  8% { transform: rotate(-1.5deg) scale(1.02); }
+  10% { transform: rotate(0.8deg) scale(1.01); }
+  12% { transform: rotate(-0.8deg) scale(1.01); }
+  14% { transform: rotate(0deg) scale(1); }
+}
+
 .spin-btn:active:not(.spin-btn--busy) {
-  transform: scale(0.96);
+  animation: none; /* Apagar animación en click activo */
+  transform: scale(0.94);
   box-shadow: inset 0 0 20px rgba(255,255,255,0.6), 0 3px 12px rgba(212,175,55,0.25);
 }
 
 .spin-btn--busy {
+  animation: none; /* Apagar animación cuando está girando */
   opacity: 0.65;
   cursor: not-allowed;
 }

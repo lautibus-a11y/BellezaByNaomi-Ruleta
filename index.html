@@ -610,7 +610,6 @@
                 id="spin-button"
                 onClick={handleSpin}
                 disabled={isSpinning}
-                whileTap={!isSpinning ? { scale: 0.94 } : {}}
                 className={`spin-btn${isSpinning ? ' spin-btn--busy' : ''}`}
                 aria-label={isSpinning ? 'Buscando diseño...' : (hasRevealed ? 'Girar de nuevo' : 'Girar diseño')}
               >
