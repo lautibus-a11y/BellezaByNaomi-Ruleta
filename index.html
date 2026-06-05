@@ -315,8 +315,9 @@
                     id="modal-reclamar-btn"
                     onClick={() => {
                       const phoneNumber = "5491161546312";
-                      const absoluteImgUrl = window.location.origin + '/' + imageSrc;
-                      const textMessage = `Hola, quiero este diseño: ${absoluteImgUrl}`;
+                      const designNumber = imageSrc.replace(/[^0-9]/g, '');
+                      const shareUrl = window.location.origin + '/diseno/' + designNumber + '.html';
+                      const textMessage = `Hola, quiero este diseño: ${shareUrl}`;
                       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(textMessage)}`;
                       window.open(whatsappUrl, '_blank');
                       onClose();
