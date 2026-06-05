@@ -292,6 +292,19 @@
         }
       }, [isOpen]);
 
+      // Precalculamos la URL de WhatsApp
+      const whatsappUrl = useMemo(() => {
+        const message = `Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`;
+        const encoded = encodeURIComponent(message);
+        
+        // Detectar si es dispositivo móvil para usar el protocolo directo whatsapp:// y evitar redirección por api.whatsapp.com
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        return isMobile
+          ? `whatsapp://send?phone=5491161546312&text=${encoded}`
+          : `https://wa.me/5491161546312?text=${encoded}`;
+      }, [imageSrc]);
+
       return (
         <AnimatePresence>
           {isOpen && (
@@ -309,86 +322,91 @@
                 {/* Fuegos artificiales en el backdrop difuminado */}
                 <FireworksCanvas />
 
-                <AnimatePresence mode="wait">
-                  {isRedirecting ? (
-                    <motion.div
-                      key="redirecting-card"
-                      id="winner-card"
-                      initial={{ scale: 0.85, y: 40, opacity: 0 }}
-                      animate={{ scale: 1, y: 0, opacity: 1 }}
-                      exit={{ scale: 0.92, opacity: 0 }}
-                      transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
-                      className="modal-card"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
-                      
-                      <h2 className="modal-title" style={{ marginTop: '20px' }}>¡Todo Listo!</h2>
-                      <p className="modal-subtitle" style={{ marginBottom: '20px', maxWidth: '300px' }}>
-                        Presiona el botón para abrir WhatsApp y enviar tu diseño seleccionado a Naomi.
-                      </p>
+                <motion.div
+                  id="winner-card"
+                  initial={{ scale: 0.85, y: 40, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.92, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
+                  className="modal-card"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
+                  <h2 className="modal-title">¡Tu Diseño!</h2>
+                  <p className="modal-subtitle">
+                    {isRedirecting 
+                      ? "Presiona el botón de abajo para enviar por WhatsApp." 
+                      : "Toma captura de pantalla y agendemos tu cita."}
+                  </p>
+                  <div className="modal-image-wrapper">
+                    <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
+                  </div>
 
-                      <motion.a
-                        id="modal-whatsapp-send-btn"
-                        href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={onClose}
-                        whileTap={{ scale: 0.96 }}
-                        className="modal-cta-btn"
-                        style={{
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        💬 Enviar por Wpp
-                      </motion.a>
-
-                      <button
-                        onClick={() => setIsRedirecting(false)}
-                        className="modal-cta-btn"
-                        style={{
-                          background: 'rgba(255,255,255,0.45)',
-                          border: '1px solid rgba(212,175,55,0.45)',
-                          color: 'var(--dark)',
-                          boxShadow: 'none',
-                          marginTop: '12px'
-                        }}
-                      >
-                        Volver
-                      </button>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="prize-card"
-                      id="winner-card"
-                      initial={{ scale: 0.85, y: 40, opacity: 0 }}
-                      animate={{ scale: 1, y: 0, opacity: 1 }}
-                      exit={{ scale: 0.92, opacity: 0 }}
-                      transition={{ type: 'spring', damping: 24, stiffness: 120, mass: 0.8 }}
-                      className="modal-card"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
-                      <h2 className="modal-title">¡Tu Diseño!</h2>
-                      <p className="modal-subtitle">Toma captura de pantalla y agendemos tu cita.</p>
-                      <div className="modal-image-wrapper">
-                        <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
-                      </div>
-                      <motion.button
-                        id="modal-reclamar-btn"
-                        onClick={() => setIsRedirecting(true)}
-                        whileTap={{ scale: 0.96 }}
-                        className="modal-cta-btn"
-                      >
-                        ✨ Reclamar Premio
-                      </motion.button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  <div style={{ width: '100%', minHeight: '58px', marginTop: '18px', position: 'relative' }}>
+                    <AnimatePresence mode="wait">
+                      {!isRedirecting ? (
+                        <motion.button
+                          key="reclamar-btn"
+                          id="modal-reclamar-btn"
+                          onClick={() => setIsRedirecting(true)}
+                          whileTap={{ scale: 0.96 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                          className="modal-cta-btn"
+                          style={{ margin: 0 }}
+                        >
+                          ✨ Reclamar Premio
+                        </motion.button>
+                      ) : (
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <motion.a
+                            key="whatsapp-btn"
+                            id="modal-whatsapp-send-btn"
+                            href={whatsappUrl}
+                            onClick={onClose}
+                            whileTap={{ scale: 0.96 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="modal-cta-btn"
+                            style={{
+                              margin: 0,
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxSizing: 'border-box'
+                            }}
+                          >
+                            💬 Enviar por Wpp
+                          </motion.a>
+                          <motion.button
+                            key="volver-btn"
+                            onClick={() => setIsRedirecting(false)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="modal-cta-btn"
+                            style={{
+                              background: 'rgba(255,255,255,0.45)',
+                              border: '1px solid rgba(212,175,55,0.45)',
+                              color: 'var(--dark)',
+                              boxShadow: 'none',
+                              marginTop: '4px',
+                              padding: '12px'
+                            }}
+                          >
+                            Volver
+                          </motion.button>
+                        </div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
               </motion.div>
             </>
           )}
