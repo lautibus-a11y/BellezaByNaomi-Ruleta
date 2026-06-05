@@ -360,14 +360,15 @@
           }
           reset(init = false) {
             this.x = Math.random() * width;
-            this.y = init ? Math.random() * height : height + 20;
-            this.size = Math.random() * 5 + 4; // de 4px a 9px (más pequeños)
-            this.speedY = Math.random() * 0.7 + 0.4; // velocidad de ascenso más lenta
-            this.opacity = Math.random() * 0.15 + 0.1; // opacidad muy sutil (0.1 a 0.25)
+            // Al inicio, dispersados en la mitad inferior. Al resetear, emergen desde el fondo.
+            this.y = init ? height * (0.35 + Math.random() * 0.65) : height + 20;
+            this.size = Math.random() * 5 + 3.5; // de 3.5px a 8.5px (sutiles)
+            this.speedY = Math.random() * 0.8 + 0.5; // flotan un poco más rápido hacia arriba
+            this.opacity = Math.random() * 0.15 + 0.08; // opacidad muy sutil y elegante (0.08 a 0.23)
             this.color = colors[Math.floor(Math.random() * colors.length)];
             this.angle = Math.random() * Math.PI * 2;
-            this.swaySpeed = Math.random() * 0.02 + 0.01;
-            this.swayAmount = Math.random() * 0.9 + 0.3;
+            this.swaySpeed = Math.random() * 0.02 + 0.015;
+            this.swayAmount = Math.random() * 1.0 + 0.3;
           }
           update() {
             this.y -= this.speedY;
@@ -397,8 +398,8 @@
           }
         }
 
-        // 14 corazones dorados (muy sutiles y elegantes)
-        for (let i = 0; i < 14; i++) {
+        // 45 corazones dorados (sistema de partículas ascendente, sutil y elegante)
+        for (let i = 0; i < 45; i++) {
           particles.push(new HeartParticle());
         }
 
@@ -443,10 +444,10 @@
       return (
         <motion.div
           className="cr-root"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, ease: 'easeInOut' }}
+          initial={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.9, ease: [0.33, 1, 0.68, 1] }}
           onClick={triggerExit}
         >
           <div className="cr-bg" />
@@ -541,7 +542,11 @@
             onClose={() => setShowModal(false)}
           />
 
-          <div className="app-layout">
+          <motion.div 
+            className="app-layout"
+            animate={{ scale: showReveal ? 0.96 : 1, filter: showReveal ? "blur(3px)" : "blur(0px)" }}
+            transition={{ duration: 1.0, ease: [0.33, 1, 0.68, 1] }}
+          >
 
             <header className="app-header">
               <HeroTitle />
@@ -637,7 +642,7 @@
               </motion.button>
             </footer>
 
-          </div>
+          </motion.div>
 
           {/* Cinematic reveal — z-index 200, encima de todo */}
           <AnimatePresence>
