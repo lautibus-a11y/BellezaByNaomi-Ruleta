@@ -323,14 +323,29 @@
                     >
                       <button id="modal-close-btn" onClick={onClose} className="modal-close-btn" aria-label="Cerrar">✕</button>
                       
-                      <div className="redirect-loader">
-                        <div className="redirect-loader__spinner" />
-                      </div>
-
-                      <h2 className="modal-title" style={{ marginTop: '24px' }}>Abriendo WhatsApp</h2>
-                      <p className="modal-subtitle" style={{ marginBottom: '24px', maxWidth: '300px' }}>
-                        Por favor, acepta el aviso de confirmación de tu pantalla para abrir el chat.
+                      <h2 className="modal-title" style={{ marginTop: '20px' }}>¡Todo Listo!</h2>
+                      <p className="modal-subtitle" style={{ marginBottom: '20px', maxWidth: '300px' }}>
+                        Presiona el botón para abrir WhatsApp y enviar tu diseño seleccionado a Naomi.
                       </p>
+
+                      <motion.a
+                        id="modal-whatsapp-send-btn"
+                        href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={onClose}
+                        whileTap={{ scale: 0.96 }}
+                        className="modal-cta-btn"
+                        style={{
+                          textDecoration: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        💬 Enviar por Wpp
+                      </motion.a>
 
                       <button
                         onClick={() => setIsRedirecting(false)}
@@ -340,7 +355,7 @@
                           border: '1px solid rgba(212,175,55,0.45)',
                           color: 'var(--dark)',
                           boxShadow: 'none',
-                          marginTop: '8px'
+                          marginTop: '12px'
                         }}
                       >
                         Volver
@@ -363,28 +378,14 @@
                       <div className="modal-image-wrapper">
                         <img src={imageSrc} alt="Diseño Ganador" className="modal-image" />
                       </div>
-                      <motion.a
+                      <motion.button
                         id="modal-reclamar-btn"
-                        href={`https://wa.me/5491161546312?text=${encodeURIComponent(`Hola, quiero este diseño: ${window.location.origin}/${imageSrc}`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => {
-                          setIsRedirecting(true);
-                          // Auto cerrar tras 6s si ya están en WhatsApp
-                          setTimeout(onClose, 6000);
-                        }}
+                        onClick={() => setIsRedirecting(true)}
                         whileTap={{ scale: 0.96 }}
                         className="modal-cta-btn"
-                        style={{
-                          textDecoration: 'none',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxSizing: 'border-box'
-                        }}
                       >
-                        ✨ Reclamar
-                      </motion.a>
+                        ✨ Reclamar Premio
+                      </motion.button>
                     </motion.div>
                   )}
                 </AnimatePresence>
